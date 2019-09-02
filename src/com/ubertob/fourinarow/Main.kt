@@ -1,4 +1,5 @@
-import com.ubertob.fourinarow.*
+package com.ubertob.fourinarow
+
 import com.ubertob.fourinarow.ColName.*
 
 fun main(){
