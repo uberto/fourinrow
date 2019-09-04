@@ -3,14 +3,18 @@ package com.ubertob.fourinarow
 sealed class Board() {
     abstract fun show(): String
     abstract val moves: List<Move>
+    abstract val nextPlayer: Player
 
 }
 
 object EmptyBoard : Board() {
     override val moves: List<Move> = emptyList()
 
+    override val nextPlayer = Player.One
+
     override fun show(): String = """
         +-+-+-+-+-+-+-+
+        | | | | | | | |
         | | | | | | | |
         | | | | | | | |
         | | | | | | | |
@@ -22,12 +26,20 @@ object EmptyBoard : Board() {
        """.trimIndent()
 }
 
-data class GameBoard(val prevBoard: Board, val move: Move) : Board() {
+data class GameBoard(val prevBoard: Board, val column: Column) : Board() {
 
-    override val moves: List<Move> = prevBoard.moves + move
+    override val nextPlayer = prevBoard.nextPlayer.other()
+
+    val player = nextPlayer.other()
+
+    override val moves: List<Move> = prevBoard.moves + Move(prevBoard.nextPlayer, column)
 
     val colMap =
-        ColName.values().map { c -> c to moves.filter { it.colName == c }.map { it.player }.let { Column(it) } }.toMap()
+        Column.values().map { c -> c to moves.filter { it.column == c }.map { it.player }.let { Pile(it) } }.toMap()
+
+    val currRow: Int = colMap[column]?.rows?.size ?: 0
+
+    fun playerInBoard(col: Column?, row: Row?): Player? = if (row == null || col == null) null else colMap[col]?.rows?.getOrNull(row.value)
 
     private fun drawGrid(): String = (1..COL_HEIGHT)
         .map { row -> colMap.values
@@ -38,7 +50,7 @@ data class GameBoard(val prevBoard: Board, val move: Move) : Board() {
         .joinToString("\n")
 
     override fun show(): String = """
-Move number ${moves.size} player ${move.player} column ${move.colName}
+Move number ${moves.size} player ${player} column ${column}
         
 +-+-+-+-+-+-+-+
 ${drawGrid()}
@@ -47,5 +59,8 @@ ${drawGrid()}
         
         
 """
+
+
+    fun winner(): Player? = playerInBoard(column.prev(),  Row.fromInt(currRow -1))
 
 }

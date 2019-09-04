@@ -1,12 +1,29 @@
 package com.ubertob.fourinarow
 
-val COL_HEIGHT = 5
+val COL_HEIGHT = 6
 
-data class Move(val player: Player, val colName: ColName)
+data class Move(val player: Player, val column: Column)
 
-enum class ColName(val num: Int){ a(1), b(2), c(3), d(4), e(5), f(6), g(7)}
+@Suppress("DataClassPrivateConstructor")
+data class Row private constructor(val value: Int) {
+    companion object {
+        fun fromInt(x: Int): Row? = if (x in 0.. COL_HEIGHT) Row(x) else null
+    }
+}
 
-data class Column(val rows: List<Player>){
+enum class Column{ a,b,c,d,e,f,g}
+
+fun Column.prev(): Column? = when (this) {
+    Column.a -> null
+    else -> Column.values()[this.ordinal - 1]
+}
+
+fun Column.next(): Column? = when (this) {
+    Column.g -> null
+    else -> Column.values()[this.ordinal + 1]
+}
+
+data class Pile(val rows: List<Player>){
 
     fun render(row: Int): Char = when {
         row < rows.size -> rows[row].sign

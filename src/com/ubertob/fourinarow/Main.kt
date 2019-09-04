@@ -1,22 +1,24 @@
 package com.ubertob.fourinarow
 
-import com.ubertob.fourinarow.ColName.*
+import com.ubertob.fourinarow.Column.*
 
 fun main(){
     println("Ready to play?")
-
-    var currBoard: Board = EmptyBoard
 
     val cols = listOf(
         c,d,d,b,e,e,c,g,c,c,e,g,a,d,e,g,g,a,d
     )
 
-    cols.fold(listOf(Move(Player.One, d))){l, c -> l.plus(Move(l.last().player.other(), c)) }.forEach {
-        println(currBoard.show())
-        currBoard = GameBoard(currBoard, it)
+    val finalBoard: Board = cols.fold(EmptyBoard as Board) { b, col ->
+        println(b.show())
+        GameBoard(b, col)
     }
 
-    println(currBoard.show())
+    println(finalBoard.show())
 
+
+    //add ask move
+    //add valid move
+    //add check winner
 
 }
