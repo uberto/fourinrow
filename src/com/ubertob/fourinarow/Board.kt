@@ -66,27 +66,50 @@ ${drawGrid()}
     fun playerAtCoord(c: Coord): Player? = playerInBoard(c.col, c.row)
 
 
-    private fun nullCoord(column: Column?, row: Row?): Coord? =
-        if (column != null && row != null)
-            Coord(column, row)
-        else
-            null
 
-    fun Coord.se(): Coord? = nullCoord(col.next(), row.prev())
-    fun Coord.ne(): Coord? = nullCoord(col.next(), row.next())
-    fun Coord.e(): Coord? = nullCoord(col.next(), row)
-    fun Coord.sw(): Coord? = nullCoord(col.prev(), row.prev())
-    fun Coord.nw(): Coord? = nullCoord(col.prev(), row.next())
-    fun Coord.w(): Coord? = nullCoord(col.prev(), row)
-    fun Coord.s(): Coord? = nullCoord(col, row.prev())
 
-    fun winner(): Player? = playerInBoard(column, row)
-//    move.s().s().s() >= 3
-//    move.ne().ne().ne() + move.sw().sw().sw() >= 3 //diagonal  move is +1
-//    move.nw().nw().nw() + move.se().se().se() >= 3 //diagonal  move is +1
-//    move.e().e().e() + move.w().w().w() >= 3 //horz  move is +1
 
+    fun countLine(start: Coord, f: (Coord) -> Coord?): Int {
+        val p = playerAtCoord(start)
+        var cc: Coord? = start
+        var tot = 0
+        while(cc != null){
+            cc = f(cc)
+            if (cc != null && playerAtCoord(cc) == p)
+                tot += 1
+            else
+                break
+        }
+        return tot
+    }
+
+    fun winner(): Player? {
+        val cc = Coord(column, row)
+
+        if ((countLine(cc, Coord::se) + countLine(cc, Coord::nw ) + 1 >= 4)
+            || (countLine(cc, Coord::sw) + countLine(cc, Coord::ne ) + 1 >= 4)
+            || (countLine(cc, Coord::w) + countLine(cc, Coord::e ) + 1 >= 4)
+            || (countLine(cc, Coord::s) + 1 >= 4))
+            return playerAtCoord(cc)
+
+        return null
+    }
 
 }
 
 data class Coord(val col: Column, val row: Row)
+
+
+private fun nullCoord(column: Column?, row: Row?): Coord? =
+    if (column != null && row != null)
+        Coord(column, row)
+    else
+        null
+
+fun Coord.se(): Coord? = nullCoord(col.next(), row.prev())
+fun Coord.ne(): Coord? = nullCoord(col.next(), row.next())
+fun Coord.e(): Coord? = nullCoord(col.next(), row)
+fun Coord.sw(): Coord? = nullCoord(col.prev(), row.prev())
+fun Coord.nw(): Coord? = nullCoord(col.prev(), row.next())
+fun Coord.w(): Coord? = nullCoord(col.prev(), row)
+fun Coord.s(): Coord? = nullCoord(col, row.prev())
