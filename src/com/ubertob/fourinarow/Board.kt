@@ -32,7 +32,6 @@ data class GameBoard(val prevBoard: Board, val column: Column) : Board() {
 
     override val nextPlayer = player.other()
 
-
     override val moves: List<Move> = prevBoard.moves + Move(prevBoard.nextPlayer, column)
 
     val colMap =
@@ -40,16 +39,13 @@ data class GameBoard(val prevBoard: Board, val column: Column) : Board() {
 
     val row: Row = Row.values()[colMap[column]?.rows?.size ?: 0]
 
-    fun playerInBoard(col: Column?, row: Row?): Player? =
-        if (row == null || col == null) null else colMap[col]?.rows?.getOrNull(row.ordinal)
-
     private fun drawGrid(): String = Row.values()
         .map { row ->
             colMap.values
-                .map { it.render(6 - row.ordinal) }
+                .map { it.render(row) }
                 .joinToString("|")
                 .let { "|$it|" }
-        }
+        }.reversed()
         .joinToString("\n")
 
     override fun show(): String = """
@@ -60,22 +56,17 @@ ${drawGrid()}
 +-+-+-+-+-+-+-+
 |a|b|c|d|e|f|g|
         
-        
+Winner: ${winner()}        
 """
 
-    fun playerAtCoord(c: Coord): Player? = playerInBoard(c.col, c.row)
+    fun playerAtCoord(c: Coord): Player? = colMap[c.col]?.rows?.getOrNull(c.row.ordinal)
 
-
-
-
-
-    fun countLine(start: Coord, f: (Coord) -> Coord?): Int {
-        val p = playerAtCoord(start)
+    fun countLine(start: Coord, player: Player, f: (Coord) -> Coord?): Int {
         var cc: Coord? = start
         var tot = 0
         while(cc != null){
             cc = f(cc)
-            if (cc != null && playerAtCoord(cc) == p)
+            if (cc != null && playerAtCoord(cc) == player)
                 tot += 1
             else
                 break
@@ -86,10 +77,11 @@ ${drawGrid()}
     fun winner(): Player? {
         val cc = Coord(column, row)
 
-        if ((countLine(cc, Coord::se) + countLine(cc, Coord::nw ) + 1 >= 4)
-            || (countLine(cc, Coord::sw) + countLine(cc, Coord::ne ) + 1 >= 4)
-            || (countLine(cc, Coord::w) + countLine(cc, Coord::e ) + 1 >= 4)
-            || (countLine(cc, Coord::s) + 1 >= 4))
+        val diag = countLine(cc, player, Coord::se) + countLine(cc, player, Coord::nw) + 1
+        val revDiag = countLine(cc, player, Coord::sw) + countLine(cc,  player,Coord::ne) + 1
+        val horz = countLine(cc, player, Coord::w) + countLine(cc,  player,Coord::e) + 1
+        val vert = countLine(cc, player, Coord::s) + 1
+        if (diag >= 4 || revDiag >= 4 || horz >= 4 || vert >= 4)
             return playerAtCoord(cc)
 
         return null

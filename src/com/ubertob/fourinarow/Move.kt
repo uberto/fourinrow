@@ -16,7 +16,7 @@ enum class Column{ a,b,c,d,e,f,g}
 
 enum class Row{ r1,r2,r3,r4,r5,r6}
 
-inline fun <reified E: Enum<E>> Enum<E>.next(): E? =  if( ordinal == Column.values().size - 1)
+inline fun <reified E: Enum<E>> Enum<E>.next(): E? =  if( ordinal >=  enumValues<E>().size - 1)
     null
 else
     enumValues<E>()[ordinal + 1]
@@ -31,8 +31,8 @@ else
 
 data class Pile(val rows: List<Player>){
 
-    fun render(row: Int): Char = when {
-        row < rows.size -> rows[row].sign
+    fun render(row: Row): Char = when {
+        row.ordinal < rows.size -> rows[ row.ordinal].sign
         else -> ' '
     }
 }
