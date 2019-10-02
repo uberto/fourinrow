@@ -16,9 +16,4 @@ fun main(){
 
     println(finalBoard.show())
 
-
-    //add ask move
-    //add valid move
-    //add check winner
-
 }
