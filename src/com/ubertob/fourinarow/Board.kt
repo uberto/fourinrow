@@ -34,14 +34,14 @@ data class GameBoard(val prevBoard: Board, val column: Column) : Board() {
 
     override val moves: List<Move> = prevBoard.moves + Move(prevBoard.nextPlayer, column)
 
-    val colMap =
+    val piles =
         Column.values().map { c -> c to moves.filter { it.column == c }.map { it.player }.let { Pile(it) } }.toMap()
 
-    val row: Row = Row.values()[(colMap[column]?.rows?.size ?: 0 )- 1]
+    val row: Row = piles[column]?.lastRow() ?: Row.r1
 
     private fun drawGrid(): String = Row.values()
         .map { row ->
-            colMap.values
+            piles.values
                 .map { it.render(row) }
                 .joinToString("|")
                 .let { "|$it|" }
@@ -59,7 +59,7 @@ ${drawGrid()}
 Winner: ${winner()}        
 """
 
-    fun playerAtCoord(c: Coord): Player? = colMap[c.col]?.player(c.row)
+    fun playerAtCoord(c: Coord): Player? = piles[c.col]?.player(c.row)
 
     fun countLine(f: (Coord) -> Coord?): Int {
         var cc: Coord? = Coord(column, row)
