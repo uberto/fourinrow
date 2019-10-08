@@ -21,7 +21,7 @@ TODO:
 3. cross todo empty board
 4. create Board class with show method
 5. add Column enum
-6. add row range
+6. add Row enum
 7. add placeChip(c: Column)
 8. add moves to Board
 9. add render row and reversed
