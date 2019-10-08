@@ -34,12 +34,17 @@ data class GameBoard(val prevBoard: Board, val column: Column) : Board() {
 
     override val moves: List<Move> = prevBoard.moves + Move(prevBoard.nextPlayer, column)
 
-    val piles =
-        Column.values().map { c -> c to moves.filter { it.column == c }.map { it.player }.let { Pile(it) } }.toMap()
+    
+    val piles = enumValues<Column>()
+        .map { c -> c to makeAPile(c) }.toMap()
+
+    private fun makeAPile(c: Column) =
+        moves.filter { it.column == c }.map { it.player }.let { Pile(it) }
+
 
     val row: Row = piles[column]?.lastRow() ?: Row.r1
 
-    private fun drawGrid(): String = Row.values()
+    private fun drawGrid(): String = enumValues<Row>()
         .map { row ->
             piles.values
                 .map { it.render(row) }
